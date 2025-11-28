@@ -22,6 +22,7 @@ import ProductModal from './ProductModal';
 import Hero from './Hero';
 import { usePantryStats } from './usePantryStats';
 import { useToast } from './ToastContext';
+import PantrySection from './PantrySection';
 
 // --- Utility ---
 function cn(...inputs) {
@@ -156,6 +157,10 @@ const Navbar = ({ activeTab, setActiveTab }) => (
 );
 
 
+// Re-exporting helper logic for use in PantrySection if needed, 
+// but currently PantrySection has its own copy to be self-contained.
+// In a real app, we'd move this to a utils.js file.
+
 const ProductCard = ({ product, onAdd, onClick }) => {
   const flags = analyzeIngredients(product.ingredients);
 
@@ -279,6 +284,34 @@ function App() {
     addToast('Item removed from pantry', 'info');
   };
 
+  const clearExpiredItems = () => {
+    const now = new Date();
+    const initialCount = pantry.length;
+
+    const newPantry = pantry.filter(item => {
+      const added = new Date(item.addedAt);
+      const expiryDate = new Date(added);
+      expiryDate.setDate(expiryDate.getDate() + item.expiryDays);
+
+      // Keep item if expiry date is in the future (or today)
+      // Actually, logic says diffDays <= 0 is expired.
+      // Let's use the same logic as getExpiryStatus for consistency.
+      const diffTime = expiryDate - now;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return diffDays > 0;
+    });
+
+    const removedCount = initialCount - newPantry.length;
+
+    if (removedCount > 0) {
+      setPantry(newPantry);
+      addToast(`Removed ${removedCount} expired items`, 'success');
+    } else {
+      addToast('No expired items found', 'info');
+    }
+  };
+
   const filteredProducts = MOCK_PRODUCTS.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.brand.toLowerCase().includes(searchQuery.toLowerCase())
@@ -334,81 +367,13 @@ function App() {
           )}
 
           {activeTab === 'pantry' && (
-            <motion.div
-              key="pantry"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="py-12 max-w-4xl mx-auto"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-3xl font-bold text-white">My Pantry</h2>
-                  {pantryFilter !== 'all' && (
-                    <button
-                      onClick={() => setPantryFilter('all')}
-                      className="px-3 py-1 bg-white/10 rounded-full text-sm text-slate-300 hover:bg-white/20 transition-colors flex items-center gap-2"
-                    >
-                      {pantryFilter === 'expiring' ? 'Expiring Soon' : 'Expired'}
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-                <button
-                  onClick={() => setPantry([])}
-                  className="text-sm text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Clear All
-                </button>
-              </div>
-
-              {pantry.length > 0 ? (
-                <div className="space-y-4">
-                  {pantry
-                    .filter(item => {
-                      if (pantryFilter === 'all') return true;
-                      const status = getExpiryStatus(item.addedAt, item.expiryDays);
-                      if (pantryFilter === 'expiring') return status.label === "Expiring Soon";
-                      if (pantryFilter === 'expired') return status.label === "Expired";
-                      return true;
-                    })
-                    .map(item => (
-                      <PantryItem key={item.id} item={item} onRemove={removeFromPantry} />
-                    ))
-                  }
-                </div>
-              ) : (
-                <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/5 border-dashed">
-                  <ShoppingBasket className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-medium text-white mb-2">Your pantry is empty</h3>
-                  <p className="text-slate-400 mb-6">Start adding items from the search tab to track them here.</p>
-                  <button
-                    onClick={() => setActiveTab('search')}
-                    className="px-6 py-2 bg-electric-blue text-white rounded-xl font-medium hover:bg-blue-600 transition-colors"
-                  >
-                    Go to Search
-                  </button>
-                </div>
-              )}
-
-              {/* Premium Teaser */}
-              <div className="mt-12 p-1 rounded-2xl bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 opacity-80">
-                <div className="bg-navy-900 rounded-xl p-6 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-amber-500/20 rounded-lg text-amber-400">
-                      <Sparkles className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-white">Unlock AI Expiry Prediction</h4>
-                      <p className="text-sm text-slate-400">Get precise shelf-life estimates based on real-time data.</p>
-                    </div>
-                  </div>
-                  <button className="px-4 py-2 bg-white text-navy-900 font-bold rounded-lg hover:bg-slate-200 transition-colors">
-                    Upgrade
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+            <PantrySection
+              pantry={pantry}
+              onRemove={removeFromPantry}
+              onClearExpired={clearExpiredItems}
+              onClearAll={() => setPantry([])}
+              initialFilter={pantryFilter}
+            />
           )}
 
           {activeTab === 'settings' && (
