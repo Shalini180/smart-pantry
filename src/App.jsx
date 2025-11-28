@@ -76,11 +76,11 @@ const getExpiryStatus = (addedDate, shelfLifeDays) => {
 
 // --- Components ---
 
-const Navbar = ({ activeTab, setActiveTab }) => (
+const Navbar = ({ activeTab, onTabChange }) => (
   <nav className="sticky top-0 z-50 backdrop-blur-xl bg-navy-900/80 border-b border-white/5">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between h-16">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('search')}>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => onTabChange('home')}>
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-electric-blue to-electric-teal flex items-center justify-center shadow-lg shadow-electric-blue/20">
             <span className="text-white font-bold text-lg">S</span>
           </div>
@@ -90,10 +90,10 @@ const Navbar = ({ activeTab, setActiveTab }) => (
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          {['Search', 'Pantry', 'Settings'].map((item) => (
+          {['Home', 'Pantry', 'Settings'].map((item) => (
             <button
               key={item}
-              onClick={() => setActiveTab(item.toLowerCase())}
+              onClick={() => onTabChange(item.toLowerCase())}
               className={cn(
                 "text-sm font-medium transition-all duration-200 hover:text-electric-teal",
                 activeTab === item.toLowerCase() ? "text-electric-teal" : "text-slate-400"
