@@ -23,6 +23,7 @@ import Hero from './Hero';
 import { usePantryStats } from './usePantryStats';
 import { useToast } from './ToastContext';
 import PantrySection from './PantrySection';
+import ShoppingListSidebar from './ShoppingListSidebar';
 
 // --- Utility ---
 function cn(...inputs) {
@@ -146,6 +147,15 @@ const Navbar = ({ activeTab, setActiveTab }) => (
               {item}
             </button>
           ))}
+
+          {/* Shopping Cart Trigger */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('toggle-shopping-list'))}
+            className="relative p-2 text-slate-400 hover:text-white transition-colors"
+          >
+            <ShoppingBasket className="w-5 h-5" />
+            <span className="absolute top-0 right-0 w-2 h-2 bg-electric-blue rounded-full" />
+          </button>
         </div>
 
         <div className="md:hidden">
@@ -255,6 +265,8 @@ function App() {
   const [activeTab, setActiveTab] = useState('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [pantry, setPantry] = useState([]);
+  const [shoppingList, setShoppingList] = useState([]);
+  const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [pantryFilter, setPantryFilter] = useState('all');
   const { addToast } = useToast();
@@ -268,6 +280,13 @@ function App() {
     setActiveTab('pantry');
     setPantryFilter(filterType);
   };
+
+  // Listen for navbar toggle
+  useEffect(() => {
+    const handleToggle = () => setIsShoppingListOpen(prev => !prev);
+    window.addEventListener('toggle-shopping-list', handleToggle);
+    return () => window.removeEventListener('toggle-shopping-list', handleToggle);
+  }, []);
 
   const addToPantry = (product) => {
     const newItem = {
@@ -310,6 +329,57 @@ function App() {
     } else {
       addToast('No expired items found', 'info');
     }
+  };
+
+  // --- Shopping List Logic ---
+
+  const addToShoppingList = (item) => {
+    // Check if already in list
+    if (shoppingList.some(i => i.name === item.name && i.brand === item.brand)) {
+      addToast(`${item.name} is already in shopping list`, 'info');
+      return;
+    }
+
+    const newItem = {
+      ...item,
+      id: Date.now() + Math.random(), // new ID for shopping list
+      addedToListAt: new Date().toISOString()
+    };
+    setShoppingList(prev => [...prev, newItem]);
+    addToast(`Added ${item.name} to shopping list`, 'success');
+  };
+
+  const removeFromShoppingList = (id) => {
+    setShoppingList(prev => prev.filter(item => item.id !== id));
+  };
+
+  const restockItems = (itemsToRestock) => {
+    const newPantryItems = itemsToRestock.map(item => ({
+      ...item,
+      id: Date.now() + Math.random(),
+      addedAt: new Date().toISOString() // Reset added date to today
+    }));
+
+    setPantry(prev => [...prev, ...newPantryItems]);
+
+    // Remove from shopping list
+    const restockedIds = itemsToRestock.map(i => i.id);
+    setShoppingList(prev => prev.filter(i => !restockedIds.includes(i.id)));
+
+    addToast(`Restocked ${itemsToRestock.length} items to pantry`, 'success');
+    setIsShoppingListOpen(false);
+  };
+
+  const handleConsume = (item) => {
+    removeFromPantry(item.id);
+    addToShoppingList(item); // Auto-add to shopping list
+    addToast(`Consumed ${item.name}. Added to shopping list.`, 'success');
+  };
+
+  const handleWaste = (item) => {
+    removeFromPantry(item.id);
+    addToast(`Marked ${item.name} as wasted`, 'info');
+    // Future: Track waste stats here
   };
 
   const filteredProducts = MOCK_PRODUCTS.filter(p =>
@@ -370,6 +440,8 @@ function App() {
             <PantrySection
               pantry={pantry}
               onRemove={removeFromPantry}
+              onConsume={handleConsume}
+              onWaste={handleWaste}
               onClearExpired={clearExpiredItems}
               onClearAll={() => setPantry([])}
               initialFilter={pantryFilter}
@@ -431,6 +503,14 @@ function App() {
             />
           )}
         </AnimatePresence>
+
+        <ShoppingListSidebar
+          isOpen={isShoppingListOpen}
+          onClose={() => setIsShoppingListOpen(false)}
+          items={shoppingList}
+          onRemove={removeFromShoppingList}
+          onRestock={restockItems}
+        />
       </main>
     </div>
   );

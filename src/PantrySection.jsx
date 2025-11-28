@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBasket, Trash2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { ShoppingBasket, Trash2, AlertCircle, CheckCircle2, XCircle, Check, Utensils } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import PantryToolbar from './PantryToolbar';
@@ -27,7 +27,7 @@ const getExpiryStatus = (addedDate, shelfLifeDays) => {
     return { label: "Fresh", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle2 };
 };
 
-const PantryItem = ({ item, onRemove }) => {
+const PantryItem = ({ item, onRemove, onConsume, onWaste }) => {
     const status = getExpiryStatus(item.addedAt, item.expiryDays);
     const StatusIcon = status.icon;
 
@@ -53,17 +53,27 @@ const PantryItem = ({ item, onRemove }) => {
                 </div>
             </div>
 
-            <button
-                onClick={() => onRemove(item.id)}
-                className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-            >
-                <Trash2 className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                    onClick={() => onConsume(item)}
+                    className="p-2 text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                    title="Consumed (Add to Shopping List)"
+                >
+                    <Check className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={() => onWaste(item)}
+                    className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    title="Wasted"
+                >
+                    <Trash2 className="w-5 h-5" />
+                </button>
+            </div>
         </motion.div>
     );
 };
 
-const PantrySection = ({ pantry, onRemove, onClearExpired, onClearAll, initialFilter = 'all' }) => {
+const PantrySection = ({ pantry, onRemove, onConsume, onWaste, onClearExpired, onClearAll, initialFilter = 'all' }) => {
     const { processedItems, filters, setFilters } = usePantryControls(pantry);
 
     // Sync initial filter from props if provided (e.g. from Hero click)
@@ -107,7 +117,13 @@ const PantrySection = ({ pantry, onRemove, onClearExpired, onClearAll, initialFi
                 <div className="space-y-4">
                     <AnimatePresence mode="popLayout">
                         {processedItems.map(item => (
-                            <PantryItem key={item.id} item={item} onRemove={onRemove} />
+                            <PantryItem
+                                key={item.id}
+                                item={item}
+                                onRemove={onRemove}
+                                onConsume={onConsume}
+                                onWaste={onWaste}
+                            />
                         ))}
                     </AnimatePresence>
                 </div>
