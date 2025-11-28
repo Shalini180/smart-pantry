@@ -11,84 +11,118 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="src/css/style.css">
-</head>
+    <!DOCTYPE html>
+    <html lang="en">
 
-<body>
-    <div class="background-grid"></div>
-    <div class="glow-orb"></div>
-
-    <nav class="glass-nav">
-        <div class="logo">SAFE<span class="accent">SHELF</span></div>
-        <div class="nav-links">
-            <a href="#">Inventory</a>
-            <a href="#">Analysis</a>
-            <a href="#" class="btn-login">System Access</a>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SafeShelf | Future of Food Intelligence</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet" href="src/css/style.css">
+        <select id="categoryFilter" class="glass-select">
+            <option value="all">All Categories</option>
+            <option value="milk & dairy">Milk & Dairy</option>
+            <option value="bread & bakery">Bread & Bakery</option>
+            <option value="vegetables & fruits">Vegetables & Fruits</option>
+            <option value="snacks & biscuits">Snacks & Biscuits</option>
+            <option value="breakfast cereals">Breakfast Cereals</option>
+            <option value="soft drinks & juices">Soft Drinks & Juices</option>
+            <option value="frozen food">Frozen Food</option>
+        </select>
+        <div class="search-bar">
+            <span class="search-icon">⌕</span>
+            <input type="text" id="searchInput" placeholder="Scan product or enter SKU...">
+            <div class="scan-line"></div>
         </div>
-    </nav>
+        <button id="searchBtn" class="btn-primary">Analyze</button>
+        </div>
+        <div id="resultsGrid" class="results-grid">
+            <!-- Results will appear here -->
+        </div>
+        </section>
+        </div>
 
-    <main class="hero-section">
-        <!DOCTYPE html>
-        <html lang="en">
-
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>SafeShelf | Future of Food Intelligence</title>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link
-                href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap"
-                rel="stylesheet">
-            <link rel="stylesheet" href="src/css/style.css">
-        </head>
-
-        <body>
-            <div class="background-grid"></div>
-            <div class="glow-orb"></div>
-
-            <nav class="glass-nav">
-                <div class="logo">SAFE<span class="accent">SHELF</span></div>
-                <div class="nav-links">
-                    <a href="#">Inventory</a>
-                    <a href="#">Analysis</a>
-                    <a href="#" class="btn-login">System Access</a>
+        <div class="section-wrapper">
+            <h2 class="flow-heading">2. Your Smart Pantry</h2>
+            <section id="pantry-section" class="glass-panel hidden">
+                <div class="pantry-header">
+                    <h2><i class="fas fa-box-open"></i> My Pantry <span id="pantryCount" class="badge">0 items</span>
+                    </h2>
+                    <button id="clearPantryBtn" class="btn-text-danger hidden">Clear All</button>
                 </div>
-            </nav>
+                <div id="pantry-list" class="pantry-grid">
+                    <!-- Pantry items will appear here -->
+                </div>
 
-            <main class="hero-section">
-                <div class="hero-content">
-                    <div class="badge">SYSTEM STATUS: ONLINE</div>
-                    <h1>THE FUTURE OF <br><span class="gradient-text">FOOD INTELLIGENCE</span></h1>
-                    <p class="hero-sub">Real-time analysis. Smart inventory. Zero waste. <br>Optimize your nutritional
-                        logistics
-                        with AI-driven precision.</p>
+                <!-- Premium Placeholder -->
+                <div class="premium-banner">
+                    <div class="premium-content">
+                        <h3><i class="fas fa-crown"></i> Unlock Premium Expiry Tracking</h3>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Smarter expiry predictions</li>
+                            <li><i class="fas fa-check"></i> Storage tips (fridge vs freezer)</li>
+                            <li><i class="fas fa-check"></i> Early warnings for expiring items</li>
+                        </ul>
+                        <button class="btn-premium">Learn More</button>
+                    </div>
+                </div>
+            </section>
+        </div>
 
-                    <div class="search-container">
-                        <div class="search-bar">
-                            <span class="search-icon">⌕</span>
-                            <input type="text" id="searchInput" placeholder="Scan product or enter SKU...">
-                            <div class="scan-line"></div>
+        <div class="section-wrapper">
+            <h2 class="flow-heading">3. Preferences</h2>
+            <section id="settings-section" class="glass-panel hidden">
+                <div class="settings-container">
+                    <div class="setting-group">
+                        <label>Theme</label>
+                        <div class="toggle-group">
+                            <button class="btn-toggle active" data-value="dark">Dark</button>
+                            <button class="btn-toggle" data-value="light">Light</button>
                         </div>
                     </div>
 
-                    <button id="searchBtn" class="cta-primary">INITIALIZE SEARCH</button>
+                    <div class="setting-group">
+                        <label>Default Category</label>
+                        <select id="settingCategory" class="glass-select">
+                            <option value="all">All Categories</option>
+                            <option value="milk & dairy">Milk & Dairy</option>
+                            <option value="bread & bakery">Bread & Bakery</option>
+                            <option value="vegetables & fruits">Vegetables & Fruits</option>
+                            <option value="snacks & biscuits">Snacks & Biscuits</option>
+                            <option value="breakfast cereals">Breakfast Cereals</option>
+                            <option value="soft drinks & juices">Soft Drinks & Juices</option>
+                            <option value="frozen food">Frozen Food</option>
+                        </select>
+                    </div>
 
-                    <!-- Pantry Section (Day 5 Addition) -->
-                    <section id="pantry-section" class="pantry-container hidden">
-                        <div class="pantry-header">
-                            <h2><i class="fas fa-box-open"></i> My Pantry</h2>
-                            <span id="pantryCount" class="badge">0 items</span>
+                    <div class="setting-group">
+                        <label>Default Sort Order</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="sortMode" value="cheapest" checked>
+                                <span>Cheapest First</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="sortMode" value="healthiest">
+                                <span>Healthiest First</span>
+                            </label>
                         </div>
-                        <div id="pantry-list" class="pantry-grid">
-                            <!-- Pantry items will be injected here -->
-                        </div>
-                    </section>
+                    </div>
 
-                    <div id="resultsGrid" class="results-grid"></div>
+                    <div class="settings-actions">
+                        <button id="saveSettingsBtn" class="btn-primary">Save Preferences</button>
+                    </div>
                 </div>
-            </main>
+            </section>
+        </div>
+        </main>
 
-            <script src="src/js/script.js"></script>
+        <script src="src/js/script.js"></script>
         </body>
 
-        </html>
+    </html>
