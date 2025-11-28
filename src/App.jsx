@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import ProductModal from './ProductModal';
+import Hero from './Hero';
+import { usePantryStats } from './usePantryStats';
 
 // --- Utility ---
 function cn(...inputs) {
@@ -152,53 +154,6 @@ const Navbar = ({ activeTab, setActiveTab }) => (
   </nav>
 );
 
-const Hero = ({ stats }) => (
-  <div className="relative overflow-hidden py-16 sm:py-24">
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-electric-blue/20 rounded-full blur-[120px] -z-10 opacity-30" />
-
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
-          <span className="block text-white mb-2">Future of</span>
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-electric-teal">
-            Food Intelligence
-          </span>
-        </h1>
-        <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10">
-          Analyze ingredients, find healthier alternatives, and track expiry—automatically.
-          Your pantry, upgraded with AI.
-        </p>
-      </motion.div>
-
-      {/* Live Stats Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="inline-flex items-center gap-8 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl shadow-black/50"
-      >
-        <div className="text-center">
-          <div className="text-3xl font-bold text-white">{stats.total}</div>
-          <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Items</div>
-        </div>
-        <div className="w-px h-12 bg-white/10" />
-        <div className="text-center">
-          <div className="text-3xl font-bold text-amber-400">{stats.expiring}</div>
-          <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Expiring</div>
-        </div>
-        <div className="w-px h-12 bg-white/10" />
-        <div className="text-center">
-          <div className="text-3xl font-bold text-red-500">{stats.expired}</div>
-          <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Expired</div>
-        </div>
-      </motion.div>
-    </div>
-  </div>
-);
 
 const ProductCard = ({ product, onAdd, onClick }) => {
   const flags = analyzeIngredients(product.ingredients);
@@ -295,12 +250,14 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [pantry, setPantry] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [pantryFilter, setPantryFilter] = useState('all');
 
   // Derived State for Stats
-  const stats = {
-    total: pantry.length,
-    expiring: pantry.filter(i => getExpiryStatus(i.addedAt, i.expiryDays).label === "Expiring Soon").length,
-    expired: pantry.filter(i => getExpiryStatus(i.addedAt, i.expiryDays).label === "Expired").length
+  const stats = usePantryStats(pantry);
+
+  const handleFilterSelect = (filterType) => {
+    setActiveTab('pantry');
+    setPantryFilter(filterType);
   };
 
   const addToPantry = (product) => {
@@ -336,7 +293,7 @@ function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <Hero stats={stats} />
+              <Hero stats={stats} onFilterSelect={handleFilterSelect} />
 
               <div className="mb-12 relative max-w-2xl mx-auto">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
@@ -379,7 +336,18 @@ function App() {
               className="py-12 max-w-4xl mx-auto"
             >
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold text-white">My Pantry</h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-3xl font-bold text-white">My Pantry</h2>
+                  {pantryFilter !== 'all' && (
+                    <button
+                      onClick={() => setPantryFilter('all')}
+                      className="px-3 py-1 bg-white/10 rounded-full text-sm text-slate-300 hover:bg-white/20 transition-colors flex items-center gap-2"
+                    >
+                      {pantryFilter === 'expiring' ? 'Expiring Soon' : 'Expired'}
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
                 <button
                   onClick={() => setPantry([])}
                   className="text-sm text-red-400 hover:text-red-300 transition-colors"
@@ -390,9 +358,18 @@ function App() {
 
               {pantry.length > 0 ? (
                 <div className="space-y-4">
-                  {pantry.map(item => (
-                    <PantryItem key={item.id} item={item} onRemove={removeFromPantry} />
-                  ))}
+                  {pantry
+                    .filter(item => {
+                      if (pantryFilter === 'all') return true;
+                      const status = getExpiryStatus(item.addedAt, item.expiryDays);
+                      if (pantryFilter === 'expiring') return status.label === "Expiring Soon";
+                      if (pantryFilter === 'expired') return status.label === "Expired";
+                      return true;
+                    })
+                    .map(item => (
+                      <PantryItem key={item.id} item={item} onRemove={removeFromPantry} />
+                    ))
+                  }
                 </div>
               ) : (
                 <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/5 border-dashed">
