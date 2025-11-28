@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import ProductModal from './ProductModal';
 
 // --- Utility ---
 function cn(...inputs) {
@@ -199,13 +200,15 @@ const Hero = ({ stats }) => (
   </div>
 );
 
-const ProductCard = ({ product, onAdd }) => {
+const ProductCard = ({ product, onAdd, onClick }) => {
   const flags = analyzeIngredients(product.ingredients);
 
   return (
     <motion.div
+      layoutId={`product-${product.id}`}
+      onClick={onClick}
       whileHover={{ y: -5 }}
-      className="group relative bg-navy-800/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-electric-blue/30 transition-all duration-300 shadow-lg hover:shadow-electric-blue/10"
+      className="group relative bg-navy-800/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-electric-blue/30 transition-all duration-300 shadow-lg hover:shadow-electric-blue/10 cursor-pointer"
     >
       <div className={`h-40 w-full bg-gradient-to-br ${product.image} relative overflow-hidden`}>
         <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300" />
@@ -236,7 +239,10 @@ const ProductCard = ({ product, onAdd }) => {
         </div>
 
         <button
-          onClick={() => onAdd(product)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd(product);
+          }}
           className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-electric-blue text-white font-medium transition-all duration-200 flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-electric-blue/25"
         >
           <Plus className="w-4 h-4" />
@@ -288,6 +294,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [pantry, setPantry] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Derived State for Stats
   const stats = {
@@ -346,7 +353,12 @@ function App() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map(product => (
-                  <ProductCard key={product.id} product={product} onAdd={addToPantry} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAdd={addToPantry}
+                    onClick={() => setSelectedProduct(product)}
+                  />
                 ))}
               </div>
 
@@ -451,6 +463,16 @@ function App() {
             </motion.div>
           )}
 
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {selectedProduct && (
+            <ProductModal
+              product={selectedProduct}
+              onClose={() => setSelectedProduct(null)}
+              onAdd={addToPantry}
+            />
+          )}
         </AnimatePresence>
       </main>
     </div>
