@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { fetchRawProductData } = require('./truthEngine');
+const { fetchProductRaw } = require('./truthEngine');
 
 const app = express();
 const PORT = 3000;
@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.get('/api/analyze/:barcode', async (req, res) => {
+app.get('/api/scan/:barcode', async (req, res) => {
     const { barcode } = req.params;
 
     if (!barcode) {
@@ -18,10 +18,10 @@ app.get('/api/analyze/:barcode', async (req, res) => {
     }
 
     try {
-        const productData = await fetchRawProductData(barcode);
+        const productData = await fetchProductRaw(barcode);
 
         if (productData) {
-            res.json(productData);
+            res.status(200).json(productData);
         } else {
             res.status(404).json({ error: 'Product not found' });
         }

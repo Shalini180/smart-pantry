@@ -5,7 +5,7 @@ const axios = require('axios');
  * @param {string} barcode 
  * @returns {Promise<Object|null>} Filtered product data or null if not found
  */
-async function fetchRawProductData(barcode) {
+async function fetchProductRaw(barcode) {
     try {
         const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
 
@@ -15,14 +15,15 @@ async function fetchRawProductData(barcode) {
             // Extract ONLY the relevant fields
             return {
                 product_name: product.product_name,
+                brands: product.brands,
                 image_url: product.image_url,
                 ingredients_text: product.ingredients_text,
                 ingredients_tags: product.ingredients_tags,
                 nutriments: {
                     sugars_100g: product.nutriments['sugars_100g'],
                     salt_100g: product.nutriments['salt_100g'],
-                    sodium_100g: product.nutriments['sodium_100g'],
-                    'saturated-fat_100g': product.nutriments['saturated-fat_100g']
+                    'saturated-fat_100g': product.nutriments['saturated-fat_100g'],
+                    'energy-kcal_100g': product.nutriments['energy-kcal_100g']
                 },
                 nova_group: product.nova_group
             };
@@ -35,4 +36,4 @@ async function fetchRawProductData(barcode) {
     }
 }
 
-module.exports = { fetchRawProductData };
+module.exports = { fetchProductRaw };
