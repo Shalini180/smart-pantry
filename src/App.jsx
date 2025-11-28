@@ -21,6 +21,7 @@ import { twMerge } from 'tailwind-merge';
 import ProductModal from './ProductModal';
 import Hero from './Hero';
 import { usePantryStats } from './usePantryStats';
+import { useToast } from './ToastContext';
 
 // --- Utility ---
 function cn(...inputs) {
@@ -251,6 +252,9 @@ function App() {
   const [pantry, setPantry] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [pantryFilter, setPantryFilter] = useState('all');
+  const { addToast } = useToast();
+
+  // Derived State for Stats
 
   // Derived State for Stats
   const stats = usePantryStats(pantry);
@@ -267,10 +271,12 @@ function App() {
       addedAt: new Date().toISOString()
     };
     setPantry([...pantry, newItem]);
+    addToast(`Added ${product.name} to pantry`, 'success');
   };
 
   const removeFromPantry = (id) => {
     setPantry(pantry.filter(item => item.id !== id));
+    addToast('Item removed from pantry', 'info');
   };
 
   const filteredProducts = MOCK_PRODUCTS.filter(p =>
@@ -435,6 +441,15 @@ function App() {
                     <option>Cheapest First</option>
                     <option>Healthiest First</option>
                   </select>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <button
+                    onClick={() => addToast('Preferences saved successfully', 'success')}
+                    className="px-6 py-2 bg-electric-blue text-white font-bold rounded-xl hover:bg-blue-600 transition-colors shadow-lg shadow-electric-blue/20"
+                  >
+                    Save Preferences
+                  </button>
                 </div>
               </div>
             </motion.div>
