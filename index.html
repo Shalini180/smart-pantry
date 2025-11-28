@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeShelf | Future of Food Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="src/css/style.css">
 </head>
+
 <body>
     <div class="background-grid"></div>
     <div class="glow-orb"></div>
@@ -26,20 +30,24 @@
         <div class="hero-content">
             <div class="badge">SYSTEM STATUS: ONLINE</div>
             <h1>THE FUTURE OF <br><span class="gradient-text">FOOD INTELLIGENCE</span></h1>
-            <p class="hero-sub">Real-time analysis. Smart inventory. Zero waste. <br>Optimize your nutritional logistics with AI-driven precision.</p>
-            
+            <p class="hero-sub">Real-time analysis. Smart inventory. Zero waste. <br>Optimize your nutritional logistics
+                with AI-driven precision.</p>
+
             <div class="search-container">
                 <div class="search-bar">
                     <span class="search-icon">⌕</span>
-                    <input type="text" placeholder="Scan product or enter SKU..." disabled>
+                    <input type="text" id="searchInput" placeholder="Scan product or enter SKU...">
                     <div class="scan-line"></div>
                 </div>
             </div>
 
-            <button class="cta-primary">INITIALIZE SYSTEM</button>
+            <button id="searchBtn" class="cta-primary">INITIALIZE SEARCH</button>
+
+            <div id="resultsGrid" class="results-grid"></div>
         </div>
     </main>
 
     <script src="src/js/script.js"></script>
 </body>
+
 </html>
