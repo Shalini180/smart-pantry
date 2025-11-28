@@ -24,6 +24,12 @@ import { usePantryStats } from './usePantryStats';
 import { useToast } from './ToastContext';
 import PantrySection from './PantrySection';
 import ShoppingListSidebar from './ShoppingListSidebar';
+import PricingModal from './PricingModal';
+import MobileNav from './MobileNav';
+import SettingsSection from './SettingsSection';
+import OnboardingOverlay from './OnboardingOverlay';
+import confetti from 'canvas-confetti';
+import { MOCK_PRODUCTS } from './data/mockProducts';
 
 // --- Utility ---
 function cn(...inputs) {
@@ -31,58 +37,7 @@ function cn(...inputs) {
 }
 
 // --- Mock Data ---
-const MOCK_PRODUCTS = [
-  {
-    id: "P001",
-    name: "Amul Taaza Milk",
-    brand: "Amul",
-    category: "Dairy",
-    price: 72,
-    image: "from-blue-400 to-blue-600",
-    ingredients: ["Toned Milk", "Vitamin A", "Vitamin D"],
-    expiryDays: 2
-  },
-  {
-    id: "P002",
-    name: "Coca Cola",
-    brand: "Coca Cola",
-    category: "Beverages",
-    price: 40,
-    image: "from-red-500 to-red-700",
-    ingredients: ["Carbonated Water", "Sugar", "Caffeine", "Color (150d)"],
-    expiryDays: 120
-  },
-  {
-    id: "P003",
-    name: "Lays Classic Salted",
-    brand: "Lays",
-    category: "Snacks",
-    price: 20,
-    image: "from-yellow-400 to-yellow-600",
-    ingredients: ["Potato", "Edible Vegetable Oil", "Salt"],
-    expiryDays: 90
-  },
-  {
-    id: "P004",
-    name: "Quaker Oats",
-    brand: "Quaker",
-    category: "Breakfast",
-    price: 190,
-    image: "from-orange-300 to-orange-500",
-    ingredients: ["Oats", "Beta Glucan"],
-    expiryDays: 180
-  },
-  {
-    id: "P005",
-    name: "Modern Whole Wheat Bread",
-    brand: "Modern",
-    category: "Bakery",
-    price: 45,
-    image: "from-amber-600 to-amber-800",
-    ingredients: ["Whole Wheat Flour", "Yeast", "Sugar", "Preservatives"],
-    expiryDays: 5
-  }
-];
+// Imported from src/data/mockProducts.js
 
 // --- Logic Engines ---
 const analyzeIngredients = (ingredients) => {
@@ -151,15 +106,17 @@ const Navbar = ({ activeTab, setActiveTab }) => (
           {/* Shopping Cart Trigger */}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-shopping-list'))}
-            className="relative p-2 text-slate-400 hover:text-white transition-colors"
+            className="relative p-3 text-slate-400 hover:text-white transition-colors"
           >
-            <ShoppingBasket className="w-5 h-5" />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-electric-blue rounded-full" />
+            <ShoppingBasket className="w-6 h-6" />
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-electric-blue rounded-full border border-navy-900" />
           </button>
         </div>
 
         <div className="md:hidden">
-          <Menu className="w-6 h-6 text-slate-400" />
+          <button className="p-3 text-slate-400">
+            <Menu className="w-6 h-6" />
+          </button>
         </div>
       </div>
     </div>
@@ -182,6 +139,13 @@ const ProductCard = ({ product, onAdd, onClick }) => {
       className="group relative bg-navy-800/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-electric-blue/30 transition-all duration-300 shadow-lg hover:shadow-electric-blue/10 cursor-pointer"
     >
       <div className={`h-40 w-full bg-gradient-to-br ${product.image} relative overflow-hidden`}>
+        {product.imageUrl && (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+          />
+        )}
         <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300" />
         <div className="absolute bottom-3 left-3">
           <span className="px-2 py-1 bg-black/40 backdrop-blur-md rounded-lg text-xs font-medium text-white border border-white/10">
@@ -237,7 +201,11 @@ const PantryItem = ({ item, onRemove }) => {
       className="flex items-center justify-between p-4 bg-navy-800/30 border border-white/5 rounded-xl hover:bg-navy-800/50 transition-colors group"
     >
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${item.image} flex-shrink-0`} />
+        <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${item.image} flex-shrink-0 overflow-hidden relative`}>
+          {item.imageUrl && (
+            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+          )}
+        </div>
         <div>
           <h4 className="font-bold text-white">{item.name}</h4>
           <div className="flex items-center gap-2 mt-1">
@@ -262,13 +230,22 @@ const PantryItem = ({ item, onRemove }) => {
 
 // --- Main App ---
 function App() {
-  const [activeTab, setActiveTab] = useState('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [pantry, setPantry] = useState([]);
   const [shoppingList, setShoppingList] = useState([]);
   const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
+  const [userTier, setUserTier] = useState('FREE'); // 'FREE' | 'PRO'
+  const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [ecoScore, setEcoScore] = useState(() => {
+    const saved = localStorage.getItem('ecoScore');
+    return saved ? parseInt(saved, 10) : 500;
+  });
+  const [activeTab, setActiveTab] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [pantryFilter, setPantryFilter] = useState('all');
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('hasSeenOnboarding');
+  });
   const { addToast } = useToast();
 
   // Derived State for Stats
@@ -287,6 +264,11 @@ function App() {
     window.addEventListener('toggle-shopping-list', handleToggle);
     return () => window.removeEventListener('toggle-shopping-list', handleToggle);
   }, []);
+
+  // Persist Eco Score
+  useEffect(() => {
+    localStorage.setItem('ecoScore', ecoScore.toString());
+  }, [ecoScore]);
 
   const addToPantry = (product) => {
     const newItem = {
@@ -373,13 +355,91 @@ function App() {
   const handleConsume = (item) => {
     removeFromPantry(item.id);
     addToShoppingList(item); // Auto-add to shopping list
-    addToast(`Consumed ${item.name}. Added to shopping list.`, 'success');
+    setEcoScore(prev => Math.min(prev + 10, 1000)); // Cap at 1000
+    addToast(`Consumed ${item.name}. +10 Eco Points! 🌱`, 'success');
   };
 
   const handleWaste = (item) => {
     removeFromPantry(item.id);
-    addToast(`Marked ${item.name} as wasted`, 'info');
+    setEcoScore(prev => Math.max(prev - 20, 0)); // Floor at 0
+    addToast(`Marked ${item.name} as wasted. -20 Eco Points 📉`, 'info');
     // Future: Track waste stats here
+  };
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (tabId === 'pantry') {
+      // Ideally scroll to pantry section, for now just ensure filter is all
+      setPantryFilter('all');
+      const pantryElement = document.getElementById('pantry-section');
+      if (pantryElement) pantryElement.scrollIntoView({ behavior: 'smooth' });
+    } else if (tabId === 'shop') {
+      setIsShoppingListOpen(true);
+    } else if (tabId === 'settings') {
+      addToast('Settings coming soon! ⚙️', 'info');
+    }
+  };
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    addToast("You're all set! Enjoy SafeShelf. 🚀", 'success');
+  };
+
+  const handleUpgrade = (planName) => {
+    setUserTier('PRO');
+    setIsPricingOpen(false);
+    addToast(`Welcome to SafeShelf ${planName}! 🌟`, 'success');
+
+    // Trigger confetti
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 150 };
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(function () {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+    }, 250);
+  };
+
+  const handleExportData = () => {
+    const data = {
+      pantry,
+      shoppingList,
+      ecoScore,
+      userTier,
+      exportedAt: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `safeshelf_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    addToast('Data exported successfully 📦', 'success');
+  };
+
+  const handleFactoryReset = () => {
+    if (window.confirm("Are you sure you want to reset SafeShelf? This will delete all your data and cannot be undone.")) {
+      localStorage.clear();
+      window.location.reload();
+    }
   };
 
   const filteredProducts = MOCK_PRODUCTS.filter(p =>
@@ -389,12 +449,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-navy-900 text-slate-200 font-sans selection:bg-electric-blue/30">
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 md:pb-20">
         <AnimatePresence mode="wait">
 
-          {activeTab === 'search' && (
+          {activeTab === 'home' && (
             <motion.div
               key="search"
               initial={{ opacity: 0, y: 10 }}
@@ -402,8 +462,15 @@ function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <Hero stats={stats} onFilterSelect={handleFilterSelect} />
+              <Hero
+                stats={stats}
+                onFilterClick={handleFilterSelect}
+                userTier={userTier}
+                ecoScore={ecoScore}
+                onUpgradeClick={() => setIsPricingOpen(true)}
+              />
 
+              {/* Content Tabs */}
               <div className="mb-12 relative max-w-2xl mx-auto">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <Search className="w-6 h-6 text-slate-500" />
@@ -445,51 +512,21 @@ function App() {
               onClearExpired={clearExpiredItems}
               onClearAll={() => setPantry([])}
               initialFilter={pantryFilter}
+              userTier={userTier}
+              onUpgradeClick={() => setIsPricingOpen(true)}
             />
           )}
 
+          {/* Anchor for scrolling */}
+          <div id="pantry-section" />
+
+          {/* Empty State / Loading would go here */}
           {activeTab === 'settings' && (
-            <motion.div
-              key="settings"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="py-12 max-w-2xl mx-auto"
-            >
-              <h2 className="text-3xl font-bold text-white mb-8">Settings</h2>
-
-              <div className="space-y-6">
-                <div className="p-6 bg-navy-800/50 border border-white/5 rounded-2xl flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-white">Appearance</h3>
-                    <p className="text-sm text-slate-400">Customize the look and feel</p>
-                  </div>
-                  <div className="flex bg-navy-900 p-1 rounded-lg border border-white/5">
-                    <button className="px-4 py-1.5 bg-electric-blue text-white rounded-md text-sm font-medium shadow-lg">Dark</button>
-                    <button className="px-4 py-1.5 text-slate-400 hover:text-white text-sm font-medium transition-colors">Light</button>
-                  </div>
-                </div>
-
-                <div className="p-6 bg-navy-800/50 border border-white/5 rounded-2xl flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-white">Sort Preference</h3>
-                    <p className="text-sm text-slate-400">Default sorting for search results</p>
-                  </div>
-                  <select className="bg-navy-900 border border-white/10 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-electric-blue">
-                    <option>Cheapest First</option>
-                    <option>Healthiest First</option>
-                  </select>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <button
-                    onClick={() => addToast('Preferences saved successfully', 'success')}
-                    className="px-6 py-2 bg-electric-blue text-white font-bold rounded-xl hover:bg-blue-600 transition-colors shadow-lg shadow-electric-blue/20"
-                  >
-                    Save Preferences
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+            <SettingsSection
+              onExport={handleExportData}
+              onReset={handleFactoryReset}
+              addToast={addToast}
+            />
           )}
 
         </AnimatePresence>
@@ -511,6 +548,22 @@ function App() {
           onRemove={removeFromShoppingList}
           onRestock={restockItems}
         />
+
+        <PricingModal
+          isOpen={isPricingOpen}
+          onClose={() => setIsPricingOpen(false)}
+          onUpgrade={handleUpgrade}
+        />
+
+        <MobileNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          cartCount={shoppingList.length}
+        />
+
+        {showOnboarding && (
+          <OnboardingOverlay onComplete={handleOnboardingComplete} />
+        )}
       </main>
     </div>
   );

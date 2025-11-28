@@ -1,16 +1,55 @@
-# React + Vite
+# SafeShelf - Smart Pantry Tracker 🥑
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Live Demo](https://img.shields.io/badge/demo-live-green.svg?style=for-the-badge)](https://safeshelf-app.vercel.app)
 
-Currently, two official plugins are available:
+> **"Netflix for your Fridge"** - A premium, AI-powered pantry management system designed to reduce food waste and save money.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🎥 Sizzle Reel
 
-## React Compiler
+*(Placeholder: Insert 60-second flow video here. Flow: Open App -> Onboarding -> Search "Avocado" -> Add to Pantry -> Check "Expiring Soon" -> Consume Item -> Eco Score Up)*
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Social Post Draft
 
-## Expanding the ESLint configuration
+**Headline:** I built a smart pantry tracker in 30 days. 🥑
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Body:**
+Stop throwing away food. Meet **SafeShelf** – the "Netflix for your Fridge".
+
+It features:
+✨ **AI Health Analysis:** Instantly flags high sugar or processed ingredients.
+🎮 **Gamification:** Earn an "Eco Score" by saving food from the bin.
+📱 **PWA Support:** Install it on your phone like a native app.
+🎨 **Premium UI:** Glassmorphism, dark mode, and buttery smooth animations.
+
+I built this using React, Tailwind CSS, and Framer Motion.
+
+**Live Demo:** [https://safeshelf-app.vercel.app](https://safeshelf-app.vercel.app)
+**GitHub:** [Link to Repo]
+
+#React #WebDev #FoodWaste #UIUX #BuildInPublic
+
+## 🛠️ Tech Stack
+
+-   **Frontend:** React, Vite
+-   **Styling:** Tailwind CSS, Framer Motion
+-   **Icons:** Lucide React
+-   **State:** LocalStorage Persistence
+-   **PWA:** Manifest & Mobile Optimization
+
+## ✨ Key Features
+
+-   **Smart Search:** Find products with instant health flags (High Sugar, Processed, etc.).
+-   **Pantry Management:** Track expiry dates with color-coded freshness indicators.
+-   **Shopping List:** Auto-generate lists when you consume items.
+-   **Gamification:** Level up your "Food Saver" status by reducing waste.
+-   **Premium Upgrade:** Unlock Pro features (simulated) with a cinematic UI.
+
+## 📦 Installation
+
+1.  Clone the repo
+2.  `npm install`
+3.  `npm run dev`
+
+## 📱 Mobile Support
+
+SafeShelf is designed as a Progressive Web App (PWA). Add it to your home screen for the best experience.

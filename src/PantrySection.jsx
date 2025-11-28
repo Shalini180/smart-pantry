@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBasket, Trash2, AlertCircle, CheckCircle2, XCircle, Check, Utensils } from 'lucide-react';
+import { ShoppingBasket, Trash2, AlertCircle, CheckCircle2, XCircle, Check, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import PantryToolbar from './PantryToolbar';
@@ -73,7 +73,7 @@ const PantryItem = ({ item, onRemove, onConsume, onWaste }) => {
     );
 };
 
-const PantrySection = ({ pantry, onRemove, onConsume, onWaste, onClearExpired, onClearAll, initialFilter = 'all' }) => {
+const PantrySection = ({ pantry, onRemove, onConsume, onWaste, onClearExpired, onClearAll, initialFilter = 'all', userTier, onUpgradeClick }) => {
     const { processedItems, filters, setFilters } = usePantryControls(pantry);
 
     // Sync initial filter from props if provided (e.g. from Hero click)
@@ -136,6 +136,29 @@ const PantrySection = ({ pantry, onRemove, onConsume, onWaste, onClearExpired, o
                     <p className="text-slate-400 mb-6">
                         {pantry.length === 0 ? "Start adding items from the search tab." : "Try adjusting your search or filters."}
                     </p>
+                </div>
+            )}
+
+            {/* Premium Teaser - Only show for FREE users */}
+            {userTier !== 'PRO' && (
+                <div className="mt-12 p-1 rounded-2xl bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 opacity-80">
+                    <div className="bg-navy-900 rounded-xl p-6 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-amber-500/20 rounded-lg text-amber-400">
+                                <Sparkles className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-bold text-white">Unlock AI Expiry Prediction</h4>
+                                <p className="text-sm text-slate-400">Get precise shelf-life estimates based on real-time data.</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={onUpgradeClick}
+                            className="px-4 py-2 bg-white text-navy-900 font-bold rounded-lg hover:bg-slate-200 transition-colors"
+                        >
+                            Upgrade
+                        </button>
+                    </div>
                 </div>
             )}
         </motion.div>
