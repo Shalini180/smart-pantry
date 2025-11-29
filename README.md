@@ -36,7 +36,21 @@ I built this using React, Tailwind CSS, and Framer Motion.
 -   **State:** LocalStorage Persistence
 -   **PWA:** Manifest & Mobile Optimization
 
-## ✨ Key Features
+## 🎥 Sizzle Reel
+
+### The Cyber-Kitchen Interface
+![Home Dashboard](file:///C:/Users/ACER/.gemini/antigravity/brain/5117fdb9-c420-4687-a76c-2f088d63fa1a/home_hero_1764379973047.png)
+
+### Smart Pantry Management
+![Pantry View](file:///C:/Users/ACER/.gemini/antigravity/brain/5117fdb9-c420-4687-a76c-2f088d63fa1a/pantry_section_1764380035454.png)
+
+### Intelligent Shopping List
+![Shopping List](file:///C:/Users/ACER/.gemini/antigravity/brain/5117fdb9-c420-4687-a76c-2f088d63fa1a/shopping_list_1764380058657.png)
+
+### The Truth Engine™ Analysis
+![Science Analysis Modal](file:///C:/Users/ACER/.gemini/antigravity/brain/5117fdb9-c420-4687-a76c-2f088d63fa1a/science_modal_1764380098480.png)
+
+## 🚀 Features
 
 -   **Smart Search:** Find products with instant health flags (High Sugar, Processed, etc.).
 -   **Pantry Management:** Track expiry dates with color-coded freshness indicators.

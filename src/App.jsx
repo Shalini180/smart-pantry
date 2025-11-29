@@ -27,9 +27,10 @@ import ShoppingListSidebar from './ShoppingListSidebar';
 import PricingModal from './PricingModal';
 import MobileNav from './MobileNav';
 import SettingsSection from './SettingsSection';
-import OnboardingOverlay from './OnboardingOverlay';
 import confetti from 'canvas-confetti';
 import ScienceAnalysisModal from './ScienceAnalysisModal';
+import CookingLoader from './CookingLoader';
+import { useKitchenLab } from './useKitchenLab';
 import { MOCK_PRODUCTS } from './data/mockProducts';
 
 // --- Utility ---
@@ -265,6 +266,7 @@ function App() {
     return !localStorage.getItem('hasSeenOnboarding');
   });
   const [isScienceModalOpen, setIsScienceModalOpen] = useState(false);
+  const { status: labStatus, data: labData, error: labError, analyzeProduct, resetLab } = useKitchenLab();
   const { addToast } = useToast();
 
   // Derived State for Stats
@@ -288,6 +290,28 @@ function App() {
   useEffect(() => {
     localStorage.setItem('ecoScore', ecoScore.toString());
   }, [ecoScore]);
+
+  // Handle Lab Status Changes
+  useEffect(() => {
+    if (labStatus === 'plated' && labData) {
+      setIsScienceModalOpen(true);
+      addToast("Analysis Complete! 🔬", "success");
+    } else if (labStatus === 'burnt' && labError) {
+      addToast(labError, "error");
+    }
+  }, [labStatus, labData, labError, addToast]);
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery) {
+      // Check if it looks like a barcode (numeric, 8-13 digits)
+      if (/^\d{8,13}$/.test(searchQuery)) {
+        analyzeProduct(searchQuery);
+      } else {
+        // Normal search filter
+        addToast(`Searching for "${searchQuery}"...`, 'info');
+      }
+    }
+  };
 
   const addToPantry = (product) => {
     const newItem = {
@@ -496,9 +520,10 @@ function App() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search products, brands, or ingredients..."
+                  placeholder="Scan barcode (e.g. 3017620422003) or search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
                   className="w-full pl-14 pr-4 py-4 bg-navy-800/50 border border-white/10 rounded-2xl text-lg text-white placeholder-slate-500 focus:outline-none focus:border-electric-blue/50 focus:ring-1 focus:ring-electric-blue/50 transition-all shadow-xl"
                 />
               </div>
@@ -586,9 +611,16 @@ function App() {
 
         <ScienceAnalysisModal
           isOpen={isScienceModalOpen}
-          onClose={() => setIsScienceModalOpen(false)}
-          analysis={MOCK_ANALYSIS_DATA}
+          onClose={() => {
+            setIsScienceModalOpen(false);
+            resetLab();
+          }}
+          analysis={labData || MOCK_ANALYSIS_DATA} // Fallback for test button
         />
+
+        {labStatus === 'chopping' && <CookingLoader />}
+
+        {/* Temporary Test Trigger */}
 
         {/* Temporary Test Trigger */}
         <button
