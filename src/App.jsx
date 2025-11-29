@@ -29,6 +29,7 @@ import MobileNav from './MobileNav';
 import SettingsSection from './SettingsSection';
 import OnboardingOverlay from './OnboardingOverlay';
 import confetti from 'canvas-confetti';
+import ScienceAnalysisModal from './ScienceAnalysisModal';
 import { MOCK_PRODUCTS } from './data/mockProducts';
 
 // --- Utility ---
@@ -38,6 +39,23 @@ function cn(...inputs) {
 
 // --- Mock Data ---
 // Imported from src/data/mockProducts.js
+const MOCK_ANALYSIS_DATA = {
+  "score": 45,
+  "grade": "D",
+  "analysis": {
+    "heart": { "status": "Risk", "reasons": ["Hidden Trans Fats detected"] },
+    "metabolic": { "status": "Critical", "reasons": ["Extreme Sugar Load (8 tsp)"] },
+    "toxicity": [
+      {
+        "name": "Hydrogenated Fat",
+        "risk": "Critical",
+        "claim": "Source of Trans Fats.",
+        "source": "WHO REPLACE 2018"
+      }
+    ]
+  },
+  "citations": ["WHO REPLACE 2018", "IARC Vol 73"]
+};
 
 // --- Logic Engines ---
 const analyzeIngredients = (ingredients) => {
@@ -246,6 +264,7 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('hasSeenOnboarding');
   });
+  const [isScienceModalOpen, setIsScienceModalOpen] = useState(false);
   const { addToast } = useToast();
 
   // Derived State for Stats
@@ -564,6 +583,21 @@ function App() {
         {showOnboarding && (
           <OnboardingOverlay onComplete={handleOnboardingComplete} />
         )}
+
+        <ScienceAnalysisModal
+          isOpen={isScienceModalOpen}
+          onClose={() => setIsScienceModalOpen(false)}
+          analysis={MOCK_ANALYSIS_DATA}
+        />
+
+        {/* Temporary Test Trigger */}
+        <button
+          onClick={() => setIsScienceModalOpen(true)}
+          className="fixed bottom-24 right-4 z-40 p-4 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition-colors"
+          title="Test Science Modal"
+        >
+          <Sparkles className="w-6 h-6" />
+        </button>
       </main>
     </div>
   );
